@@ -56,6 +56,10 @@ const profileSchema = new mongoose.Schema({
         },
     }],
     education: [{
+        school: {
+            type: String,
+            required: true
+        },
         degree: {
             type: String,
             required: true
@@ -75,8 +79,9 @@ const profileSchema = new mongoose.Schema({
             type: Boolean,
             default: false
         },
-        from: {
+        description: {
             type: String,
+            default: false
         },
     }],
     social:{

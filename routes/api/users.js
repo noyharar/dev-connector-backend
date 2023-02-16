@@ -41,7 +41,7 @@ router.post('/', [
           user:{
             id: user.id
           }
-        }
+        };
         jwt.sign(payload, jwtSecret,{expiresIn: '30d'},
             (err,token)=> {
               if(err) throw err;

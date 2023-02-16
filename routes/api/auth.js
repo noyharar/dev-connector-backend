@@ -35,17 +35,17 @@ router.post('/login', [
         }
         try{
             const {email, password} = req.body;
-            const userExists = await User.findOne({email});
-            if(!userExists) {
+            const user = await User.findOne({email});
+            if(!user) {
                 res.status(400).json({errors: [{msg: 'One of the details incorrect'}]});
             }
-            const isMatch = await bycrpt.compare(password,userExists.password)
+            const isMatch = await bycrpt.compare(password,user.password)
             if(!isMatch){
                 res.status(400).json({errors: [{msg: 'One of the details incorrect'}]});
             }
             const payload = {
-                userExists:{
-                    id: userExists.id
+                user:{
+                    id: user.id
                 }
             };
             jwt.sign(payload, jwtSecret,{expiresIn: '30d'},
