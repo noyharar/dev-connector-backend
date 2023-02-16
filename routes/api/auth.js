@@ -7,7 +7,8 @@ const jwt = require("jsonwebtoken");
 const config = require('config');
 const jwtSecret = config.get('jwtSecret');
 const User = require('../../models/User');
-const bycrpt = require('bcryptjs')
+const bycrpt = require('bcryptjs');
+
 // @route GET api/auth
 // @desc
 // @access Public
