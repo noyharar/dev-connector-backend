@@ -90,5 +90,51 @@ router.delete('/:id',auth,
         }
     });
 
+// @route PUT api/posts/like/:id
+// @desc Like a post
+// @access Private
+router.put('/like/:id', auth, async (req, res) =>{
+    try {
+        //get all sorted posts fron the newest (-1) to oldest
+        const post = await Post.findById(req.params.id);
+        //check if the post already liked by curr user
+        if(post.likes.filter(like => like.user.toString() === req.user.id).length > 0){
+            return res.status(400).json({msg : 'Post already liked'});
+        }
+        //unshift - put on begging, user logged in id
+        post.likes.unshift({user: req.user.id});
+        post.save();
+        res.json(post.likes);
+    }catch (err) {
+        console.error(err.message);
+        if(err.kind ==='ObjectId'){
+            return res.status(400).json({msg : 'Post not found'});
+        }
+        res.status(500).send('Server Error');
+    }
+});
+
+// @route PUT api/posts/unlike/:id
+// @desc Like a post
+// @access Private
+router.put('/unlike/:id', auth, async (req, res) =>{
+    try {
+        //get all sorted posts fron the newest (-1) to oldest
+        const post = await Post.findById(req.params.id);
+        //check if the post already liked by curr user
+        if(post.likes.filter(like => like.user.toString() === req.user.id).length === 0){
+            return res.status(400).json({msg : 'Post not yet liked'});
+        }
+        post.likes = post.likes.filter(x => x.user.toString() !== req.user.id);
+        post.save();
+        res.json(post.likes);
+    }catch (err) {
+        console.error(err.message);
+        if(err.kind ==='ObjectId'){
+            return res.status(400).json({msg : 'Post not found'});
+        }
+        res.status(500).send('Server Error');
+    }
+});
 
 module.exports = router;
