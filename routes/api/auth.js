@@ -10,7 +10,7 @@ const User = require('../../models/User');
 const bycrpt = require('bcryptjs');
 
 // @route GET api/auth
-// @desc
+// @desc get user
 // @access Public
 router.get('/',auth, async (req, res) => {
     try {
@@ -37,7 +37,7 @@ router.post('/login', [
             const {email, password} = req.body;
             const user = await User.findOne({email});
             if(!user) {
-                res.status(400).json({errors: [{msg: 'One of the details incorrect'}]});
+               return res.status(400).json({errors: [{msg: 'One of the details incorrect'}]});
             }
             const isMatch = await bycrpt.compare(password,user.password)
             if(!isMatch){
