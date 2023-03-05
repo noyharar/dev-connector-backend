@@ -97,8 +97,9 @@ router.put('/like/:id', auth, async (req, res) =>{
     try {
         //get all sorted posts fron the newest (-1) to oldest
         const post = await Post.findById(req.params.id);
+
         //check if the post already liked by curr user
-        if(post.likes.filter(like => like.user.toString() === req.user.id).length > 0){
+        if(post.toJSON().likes.filter(like => like.user.toString() === req.user.id).length > 0){
             return res.status(400).json({msg : 'Post already liked'});
         }
         //unshift - put on begging, user logged in id
@@ -174,26 +175,39 @@ router.post('/comment/:id', [
 // @route DELETE api/posts/comment/:id
 // @desc Delete on a post
 // @access Private
-router.delete('/comment/:id', auth,
-    async (req, res) =>{
-        try {
-            const post  = await Post.findById(req.params.id);
-            //Check user logged in delete his post
-            if(post.user.toString() !== req.user.id){
-                return res.status(400).json({msg : 'User not authorized'});
-            }
-            var length = post.comments.length;
-            post.comments = post.comments.filter(x => x.user.toString() !== req.user.id);
-            if(length === post.comments.length){
-                return res.status(400).json({msg : 'Comment not found'});
-            }
+router.delete('/comment/:id/:comment_id', auth, async (req, res) => {
+    try {
+        const post = await Post.findById(req.params.id);
 
-            post.save();
-            res.json(post.comments);
-        }catch (err) {
-            console.error(err.message);
-            res.status(500).send('Server Error');
+        // Pull out comment
+        const comment = post.comments.find(
+            comment => comment.id === req.params.comment_id
+        );
+
+        // Make sure comment exists
+        if (!comment) {
+            return res.status(404).json({ msg: 'Comment does not exist' });
         }
-    });
+
+        // Check user
+        if (comment.user.toString() !== req.user.id) {
+            return res.status(401).json({ msg: 'User not authorized' });
+        }
+
+        // Get remove index
+        const removeIndex = post.comments
+            .map(comment => comment.id)
+            .indexOf(req.params.comment_id);
+
+        post.comments.splice(removeIndex, 1);
+
+        await post.save();
+
+        res.json(post.comments);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
 
 module.exports = router;
